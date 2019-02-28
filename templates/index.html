@@ -1,0 +1,69 @@
+<html>
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+</head>
+<body>
+    <header>
+    </header>
+    <nav></nav>
+    <aside>
+        <section>
+            <div>List of Stations</div>
+            <ul class="station-list">
+                
+            </ul>
+        </section>
+
+    </aside>
+    <section>
+        <div>Realtime Departure time at xyz station</div>
+        <div class="realtime-dept">
+        </div>
+    </section>
+    <section>
+        <div>Trains from abc to xyz</div>
+        <div class="train-info">
+        </div>
+    </section>
+    <script>
+        $.ajax({ 
+             type: "GET",
+             url: "/stations",
+             success: function(data){ 
+                var newHTML = $.map(JSON.parse(data), function(value) {
+                    return('<li>' + value.name + '</li>');
+                });
+                $(".station-list").html(newHTML.join(""));   
+             }
+         });
+
+         $.ajax({ 
+             type: "GET",
+             url: "/trips",
+             success: function(data){ 
+                tripData = JSON.parse(data)
+                var newHTML = $.map(tripData.etd, function(value){
+                    return('<div>Minutes - <span>'+value.minutes+'</span></div>'
+                            +'<div>Platform - <span>'+value.platform+'</span></div>'
+                            +'<div>Delay - <span>'+value.delay+'</span></div>')
+                });
+
+                var newTrain = $.map(tripData.trip, function(value){
+                    return('<div><span>'+value['@origTimeMin']+' - '+value['@origTimeDate']+' from '+value['@origin']+'-> '+value['@destTimeMin']+' - '+value['@destTimeDate']+' to '+value['@destination']+'</span></div>'+'<div>Fare - <span>'+value['@fare']+'</span></div>')
+                })
+                $(".realtime-dept").html(newHTML.join(""));
+                $(".train-info").html(newTrain.join(""));
+             }
+         });
+
+
+         $.ajax({ 
+             type: "GET",
+             url: "/station",
+             success: function(data){  
+                console.log(data)
+             }
+         });
+    </script>
+</body>
+</html>
