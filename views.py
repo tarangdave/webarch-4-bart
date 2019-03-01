@@ -3,7 +3,7 @@ import sys
 import logging
 import json
 
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 app = Flask(__name__)
 
 barturl = "http://api.bart.gov/api/{0}.aspx?cmd={1}&orig=RICH&key=MW9S-E7SL-26DU-VV8V&json=y"
@@ -35,24 +35,28 @@ def stations():
 @app.route("/trips", methods=['GET'])
 def trips():
     result = {}
+    source = request.args.get('src')
+    destination = request.args.get('dest')
+    print(source, destination)
     try:
-        res = requests.get(arrivalurl.format("12th","rock"))
+        res = requests.get(arrivalurl.format(source,destination))
         res.raise_for_status()
+        res = json.loads(res.text)
     except Exception as e:
-        logging.ERROR("Request Failed - {0}".format(e))
+        print("Request Failed - {0}".format(e))
     
-    res = json.loads(res.text)
-
+    print(res)
     destinationStation = res['root']['schedule']['request']['trip'][0]['leg'][0]['@trainHeadStation']
     print(destinationStation)
 
     try:
-        realtimeRes = requests.get(realtimeDept.format("12th"))
+        realtimeRes = requests.get(realtimeDept.format(source))
         realtimeRes.raise_for_status()
     except Exception as e:
         logging.ERROR("Request Failed - {0}".format(e))
     
     realtimeRes = json.loads(realtimeRes.text)
+    print(realtimeRes)
 
     etdRealtime = realtimeRes['root']['station'][0]['etd']
     finaletd = []
