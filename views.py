@@ -10,7 +10,7 @@ barturl = "http://api.bart.gov/api/{0}.aspx?cmd={1}&orig=RICH&key=MW9S-E7SL-26DU
 arrivalurl = "http://api.bart.gov/api/sched.aspx?cmd=arrive&orig={0}&dest={1}&key=MW9S-E7SL-26DU-VV8V&json=y"
 realtimeDept = "http://api.bart.gov/api/etd.aspx?cmd=etd&orig={0}&key=MW9S-E7SL-26DU-VV8V&json=y"
 stationInfo = "http://api.bart.gov/api/stn.aspx?cmd=stninfo&orig={0}&key=MW9S-E7SL-26DU-VV8V&json=y"
-
+globalStation = []
 
 
 @app.route("/")
@@ -28,9 +28,18 @@ def stations():
     
     res = json.loads(res.text)
     stationList = res['root']['stations']['station']
+    global globalStation
+    globalStation = stationList
 
     return json.dumps(stationList)
 
+def getAbbr(name):
+    """
+    get the abbr from the name of the station.
+    """
+    for i in globalStation:
+        if i["name"] == name:
+            return i["abbr"]
 
 @app.route("/trips", methods=['GET'])
 def trips():
@@ -45,9 +54,7 @@ def trips():
     except Exception as e:
         print("Request Failed - {0}".format(e))
     
-    print(res)
     destinationStation = res['root']['schedule']['request']['trip'][0]['leg'][0]['@trainHeadStation']
-    print(destinationStation)
 
     try:
         realtimeRes = requests.get(realtimeDept.format(source))
@@ -56,12 +63,11 @@ def trips():
         logging.ERROR("Request Failed - {0}".format(e))
     
     realtimeRes = json.loads(realtimeRes.text)
-    print(realtimeRes)
 
     etdRealtime = realtimeRes['root']['station'][0]['etd']
     finaletd = []
     for val in etdRealtime:
-        if val['destination'] == destinationStation:
+        if val['abbreviation'] == getAbbr(destinationStation):
             finaletd = val['estimate']
     # print(res['root']['schedule']['request'])
     # print(finaletd)
@@ -75,8 +81,9 @@ def trips():
 
 @app.route("/station", methods=['GET'])
 def station():
+    source = request.args.get('src')
     try:
-        res = requests.get(stationInfo.format("ssan"))
+        res = requests.get(stationInfo.format(source))
         res.raise_for_status()
     except Exception as e:
         logging.ERROR("Request Failed - {0}".format(e))
