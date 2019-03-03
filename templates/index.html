@@ -3,46 +3,69 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="../static/style.css">
 </head>
 <body>
     <header>
     </header>
     <nav></nav>
     <div class="container">
-        <div class="col-md-12 col-sm-12 col-lg-12 col-xs-12">
-            <div class="col-md-3 col-lg-3 col-sm-12 col-xs-12">Source Station</div>
-            <div class="col-md-3 col-lg-3 col-sm-12 col-xs-12">Destination Station</div>
+        <div class="col-md-6 col-sm-6 col-xs-12 col-lg-6">
+            <div class="col-md-12 col-sm-12 col-lg-12 col-xs-12">
+                <div class="col-md-5 col-lg-5 col-sm-12 col-xs-12">Source Station</div>
+                <div class="col-md-5 col-lg-5 col-sm-12 col-xs-12">Destination Station</div>
+            </div>
+            <div class="col-md-12 col-sm-12 col-lg-12 col-xs-12">
+                <section class="col-md-5 col-lg-5 col-sm-12 col-xs-12">
+                    <div>
+                      <select class="btn btn-primary station-list source">
+                      </select> 
+                    </div>
+                </section>
+                <section class="col-md-5 col-lg-5 col-sm-12 col-xs-12">
+                    <div>
+                      <select class="btn btn-primary station-list destination">
+                      </select>
+                    </div>
+                </section>
+                <section class="col-md-2 col-lg-2 col-sm-12 col-xs-12">
+                    <button class="btn btn-primary" type="button" id="go-button">Go!</button>
+                </section>
+            </div>
+            <div class="col-md-12 col-sm-12 col-lg-12 col-xs-12">
+                <section class="col-md-6 col-sm-6 col-lg-6 col-xs-12">
+                    <div class="realtime-title">Realtime Departure time at <span></span> station</div>
+                    <div class="realtime-dept">
+                    </div>
+                </section>
+            </div>
+            <div class="col-md-12 col-sm-12 col-lg-12 col-xs-12">
+                <section class="col-md-6 col-sm-6 col-lg-6 col-xs-12">
+                    <div>Trains from <span id="src-span"></span> to <span id="dest-span"></span></div>
+                    <div class="train-info">
+                    </div>
+                </section>
+            </div>
         </div>
-        <div class="col-md-12 col-sm-12 col-lg-12 col-xs-12">
-            <section class="col-md-3 col-lg-3 col-sm-12 col-xs-12">
-                <div>
-                  <select class="btn btn-primary station-list source">
-                  </select> 
+        <div class="col-md-6 col-sm-6 col-xs-12 col-lg-6">
+            <aside class="col-md-12 col-sm-12 col-xs-12 col-lg-12 station-box realtime-box">
+                <div class="name"><span></span></div>
+                <div class="address"><span></span></div>
+                <div class="col-md-6 col-sm-6 col-xs-12 col-lg-6">
+                    <div>South Platform</div>
+                    <ul class="south-platforms">
+                    </ul>
                 </div>
-            </section>
-            <section class="col-md-3 col-lg-3 col-sm-12 col-xs-12">
-                <div>
-                  <select class="btn btn-primary station-list destination">
-                  </select>
+                <div class="col-md-6 col-sm-6 col-xs-12 col-lg-6">
+                    <div>North Platform</div>
+                    <ul class="north-pathforms">
+                    </ul>
                 </div>
-            </section>
-            <section class="col-md-3 col-lg-3 col-sm-12 col-xs-12">
-                <button class="btn btn-primary" type="button" id="go-button">Go!</button>
-            </section>
-        </div>
-        <div class="col-md-12 col-sm-12 col-lg-12 col-xs-12">
-            <section>
-                <div class="realtime-title">Realtime Departure time at <span></span> station</div>
-                <div class="realtime-dept">
-                </div>
-            </section>
-        </div>
-        <div class="col-md-12 col-sm-12 col-lg-12 col-xs-12">
-            <section>
-                <div>Trains from <span id="src-span"></span> to <span id="dest-span"></span></div>
-                <div class="train-info">
-                </div>
-            </section>
+                <div class="platinfo"><span></span></div>
+                <div class="restaurants"><span></span></div>
+                <div class="shopping"><span></span></div>
+                <div class="attraction"><span></span></div>
+            </aside>
         </div>
     </div>
     <script>
@@ -65,6 +88,33 @@
              }
          });
 
+        function ajaxCall(srcAbbr, destAbbr){
+
+            console.log("ajax call yay")
+            $.ajax({ 
+                    type: "GET",
+                    url: "/trips",
+                    data: {
+                        src: srcAbbr,
+                        dest: destAbbr
+                    },
+                    success: function(data){ 
+                        tripData = JSON.parse(data)
+                        var newHTML = $.map(tripData.etd, function(value){
+                            return('<div class="realtime-box"><div>Minutes - <span>'+value.minutes+'</span></div>'
+                                +'<div>Platform - <span>'+value.platform+'</span></div>'
+                                +'<div>Delay - <span>'+value.delay+'</span></div></div>')
+                        });
+
+                        var newTrain = $.map(tripData.trip, function(value){
+                            return('<div class="realtime-box"><div><span>'+value['@origTimeMin']+' - '+value['@origTimeDate']+' from '+value['@origin']+'-> '+value['@destTimeMin']+' - '+value['@destTimeDate']+' to '+value['@destination']+'</span></div>'+'<div>Fare - <span>'+value['@fare']+'</span></div></div>')
+                        })
+                        $(".realtime-dept").html(newHTML.join(""));
+                        $(".train-info").html(newTrain.join(""));
+                    }
+                });
+        }
+
 
         $(function(){
             $("#go-button").click(function(){
@@ -82,39 +132,47 @@
                 $("#src-span").text(srcElement.val())
                 $("#dest-span").text(destElement.val())
 
-                $.ajax({ 
-                    type: "GET",
-                    url: "/trips",
-                    data: {
-                        src: srcAbbr,
-                        dest: destAbbr
-                    },
-                    success: function(data){ 
-                        tripData = JSON.parse(data)
-                        var newHTML = $.map(tripData.etd, function(value){
-                            return('<div>Minutes - <span>'+value.minutes+'</span></div>'
-                                +'<div>Platform - <span>'+value.platform+'</span></div>'
-                                +'<div>Delay - <span>'+value.delay+'</span></div>')
-                        });
-
-                        var newTrain = $.map(tripData.trip, function(value){
-                            return('<div><span>'+value['@origTimeMin']+' - '+value['@origTimeDate']+' from '+value['@origin']+'-> '+value['@destTimeMin']+' - '+value['@destTimeDate']+' to '+value['@destination']+'</span></div>'+'<div>Fare - <span>'+value['@fare']+'</span></div>')
-                        })
-                        $(".realtime-dept").html(newHTML.join(""));
-                        $(".train-info").html(newTrain.join(""));
-                    }
-                });
+                ajaxCall(srcAbbr, destAbbr)
             })
         })
 
+        $(function(){
+            $(".source").on('change', function(){
+                var srcElement = $(".source option:selected");
+                var abbr = srcElement.attr("data-abbr");
 
-         $.ajax({ 
-             type: "GET",
-             url: "/station",
-             success: function(data){  
-                // console.log(data)
-             }
-         });
+                $.ajax({ 
+                     type: "GET",
+                     url: "/station",
+                     data: {
+                        src: abbr
+                     },
+                     success: function(data){  
+                        data = JSON.parse(data)
+                        console.log(data)
+                        $(".station-box .name span").text(data.name)
+                        $(".station-box .address span").text(data.address+', '+data.city+', '+data.county+', '+data.state+', '+data.zipcode)
+                        $(".station-box .platinfo span").text(data.platform_info)
+                        $(".station-box .restaurants span").html(data.food["#cdata-section"])
+                        $(".station-box .shopping span").html(data.shopping["#cdata-section"])
+                        $(".station-box .attraction span").html(data.attraction["#cdata-section"])
+                        var newSPlatform = $.map(data.south_platforms.platform, function(value){
+                            return('<li>'+value+'</li>')
+                        });
+                        var newNPlatform = $.map(data.north_platforms.platform, function(value){
+                            return('<li>'+value+'</li>')
+                        });
+
+                        $(".south-platforms").html(newSPlatform.join(""));
+                        $(".north-pathforms").html(newNPlatform.join(""));
+
+                     }
+                 });
+            })
+        });
+         
+
+         // setInterval(ajaxCall, 3000);
     </script>
 </body>
 </html>
