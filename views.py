@@ -44,7 +44,7 @@ def getAbbr(name):
 @app.route("/trips", methods=['GET'])
 def trips():
     result = {}
-    source = request.args.get('src')
+    source = request.args.get('source')
     destination = request.args.get('dest')
     print(source, destination)
     try:
@@ -81,7 +81,7 @@ def trips():
 
 @app.route("/station", methods=['GET'])
 def station():
-    source = request.args.get('src')
+    source = request.args.get('source')
     try:
         res = requests.get(stationInfo.format(source))
         res.raise_for_status()

@@ -9,6 +9,7 @@
     <header>
     </header>
     <nav></nav>
+    <div class="welcome-message"><span></span></div>
     <div class="container">
         <div class="col-md-6 col-sm-6 col-xs-12 col-lg-6">
             <div class="col-md-12 col-sm-12 col-lg-12 col-xs-12">
@@ -35,6 +36,7 @@
             <div class="col-md-12 col-sm-12 col-lg-12 col-xs-12">
                 <section class="col-md-6 col-sm-6 col-lg-6 col-xs-12">
                     <div class="realtime-title">Realtime Departure time at <span></span> station</div>
+                    <div class="realtime-countdown">Next train arriving in <span></span> seconds</div>
                     <div class="realtime-dept">
                     </div>
                 </section>
@@ -75,8 +77,17 @@
         var destLat;
         var srcLong;
         var destLong;
+        var countdown;
+        var visits;
 
+        if(localStorage.visits){
+            localStorage.visits = Number(localStorage.visits)+1;
+        }
+        else{
+            localStorage.visits = 1
+        }
 
+        $(".welcome-message span").text("Welcome to bart. You visited this site "+localStorage.visits+" times.")
         $.ajax({ 
              type: "GET",
              url: "/stations",
@@ -95,11 +106,12 @@
                     type: "GET",
                     url: "/trips",
                     data: {
-                        src: srcAbbr,
+                        source: srcAbbr,
                         dest: destAbbr
                     },
                     success: function(data){ 
                         tripData = JSON.parse(data)
+                        countdown = tripData.etd[0].minutes * 60
                         var newHTML = $.map(tripData.etd, function(value){
                             return('<div class="realtime-box"><div>Minutes - <span>'+value.minutes+'</span></div>'
                                 +'<div>Platform - <span>'+value.platform+'</span></div>'
@@ -114,6 +126,17 @@
                     }
                 });
         }
+        function myCountdown(){
+            countdown--;
+            if(countdown<1 || isNaN(countdown)){
+                $(".realtime-countdown span").text(0)
+            }
+            else{
+                $(".realtime-countdown span").text(countdown)
+            }
+        }
+
+        setInterval(myCountdown,1000)
 
 
         $(function(){
@@ -136,6 +159,8 @@
             })
         })
 
+        setInterval(function(){ajaxCall(srcAbbr,destAbbr)},30000)
+
         $(function(){
             $(".source").on('change', function(){
                 var srcElement = $(".source option:selected");
@@ -145,7 +170,7 @@
                      type: "GET",
                      url: "/station",
                      data: {
-                        src: abbr
+                        source: abbr
                      },
                      success: function(data){  
                         data = JSON.parse(data)
@@ -171,8 +196,6 @@
             })
         });
          
-
-         // setInterval(ajaxCall, 3000);
     </script>
 </body>
 </html>
