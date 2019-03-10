@@ -4,12 +4,15 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="../static/style.css">
+    <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDfd1eGJSSGDAKAwOuu-6GyMEeOt8Fpxd4&callback=initMap">
+    </script>
 </head>
 <body>
     <header>
     </header>
     <nav></nav>
-    <div class="welcome-message"><span></span></div>
+    <div class="welcome-message"><div class="alert alert-info"><strong>Info! </strong><span></span></div></div>
     <div class="container">
         <div class="col-md-6 col-sm-6 col-xs-12 col-lg-6">
             <div class="col-md-12 col-sm-12 col-lg-12 col-xs-12">
@@ -68,6 +71,9 @@
                 <div class="shopping"><span></span></div>
                 <div class="attraction"><span></span></div>
             </aside>
+            <aside class="col-md-12 col-xs-12 col-sm-12 col-lg-12">
+                <div id="map"></div>
+            </aside>
         </div>
     </div>
     <script>
@@ -101,7 +107,6 @@
 
         function ajaxCall(srcAbbr, destAbbr){
 
-            console.log("ajax call yay")
             $.ajax({ 
                     type: "GET",
                     url: "/trips",
@@ -113,7 +118,7 @@
                         tripData = JSON.parse(data)
                         countdown = tripData.etd[0].minutes * 60
                         var newHTML = $.map(tripData.etd, function(value){
-                            return('<div class="realtime-box"><div>Minutes - <span>'+value.minutes+'</span></div>'
+                            return('<div class="realtime-box col-md-12 col-sm-12 col-xs-12 col-lg-12"><div col->Minutes - <span>'+value.minutes+'</span></div>'
                                 +'<div>Platform - <span>'+value.platform+'</span></div>'
                                 +'<div>Delay - <span>'+value.delay+'</span></div></div>')
                         });
@@ -154,7 +159,7 @@
 
                 $("#src-span").text(srcElement.val())
                 $("#dest-span").text(destElement.val())
-
+                initMap()
                 ajaxCall(srcAbbr, destAbbr)
             })
         })
@@ -174,7 +179,6 @@
                      },
                      success: function(data){  
                         data = JSON.parse(data)
-                        console.log(data)
                         $(".station-box .name span").text(data.name)
                         $(".station-box .address span").text(data.address+', '+data.city+', '+data.county+', '+data.state+', '+data.zipcode)
                         $(".station-box .platinfo span").text(data.platform_info)
@@ -195,6 +199,70 @@
                  });
             })
         });
+
+
+        function initMap() {
+          var directionsDisplay = new google.maps.DirectionsRenderer;
+          var directionsService = new google.maps.DirectionsService;
+          var map = new google.maps.Map(document.getElementById('map'), {
+            zoom: 14,
+            center: {lat: parseFloat(srcLat), lng: parseFloat(srcLong)}
+          });
+          directionsDisplay.setMap(map);
+
+          calculateAndDisplayRoute(directionsService, directionsDisplay);
+        }
+
+        function calculateAndDisplayRoute(directionsService, directionsDisplay) {
+          directionsService.route({
+            origin: {lat: parseFloat(srcLat), lng: parseFloat(srcLong)},  // Haight.
+            destination: {lat: parseFloat(destLat), lng: parseFloat(destLong)},  // Ocean Beach.
+            // Note that Javascript allows us to access the constant
+            // using square brackets and a string value as its
+            // "property."
+            travelMode: google.maps.TravelMode["TRANSIT"]
+          }, function(response, status) {
+            console.log(response)
+            if (status == 'OK') {
+              directionsDisplay.setDirections(response);
+            } else {
+              console.log(status);
+            }
+          });
+        }
+
+//         function initMap() {
+//   var directionsDisplay = new google.maps.DirectionsRenderer;
+//   var directionsService = new google.maps.DirectionsService;
+//   var map = new google.maps.Map(document.getElementById('map'), {
+//     zoom: 14,
+//     center: {lat: 37.77, lng: -122.447}
+//   });
+//   directionsDisplay.setMap(map);
+
+//   calculateAndDisplayRoute(directionsService, directionsDisplay);
+//   // document.getElementById('mode').addEventListener('change', function() {
+//   //   calculateAndDisplayRoute(directionsService, directionsDisplay);
+//   // });
+// }
+
+// function calculateAndDisplayRoute(directionsService, directionsDisplay) {
+//   // var selectedMode = document.getElementById('mode').value;
+//   directionsService.route({
+//     origin: {lat: 37.77, lng: -122.447},  // Haight.
+//     destination: {lat: 37.768, lng: -122.511},  // Ocean Beach.
+//     // Note that Javascript allows us to access the constant
+//     // using square brackets and a string value as its
+//     // "property."
+//     travelMode: google.maps.TravelMode["TRANSIT"]
+//   }, function(response, status) {
+//     if (status == 'OK') {
+//       directionsDisplay.setDirections(response);
+//     } else {
+//       window.alert('Directions request failed due to ' + status);
+//     }
+//   });
+// }
          
     </script>
 </body>
