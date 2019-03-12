@@ -3,6 +3,9 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="../static/css/jquery.countdown.css"> 
+    <script type="text/javascript" src="../static/js/jquery.plugin.js"></script> 
+    <script type="text/javascript" src="../static/js/jquery.countdown.js"></script>
     <link rel="stylesheet" href="../static/style.css">
     <script async defer
     src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDfd1eGJSSGDAKAwOuu-6GyMEeOt8Fpxd4&callback=initMap">
@@ -37,17 +40,45 @@
                 </section>
             </div>
             <div class="col-md-12 col-sm-12 col-lg-12 col-xs-12">
-                <section class="col-md-6 col-sm-6 col-lg-6 col-xs-12">
+                <section class="col-md-12 col-sm-12 col-lg-12 col-xs-12">
                     <div class="realtime-title">Realtime Departure time at <span></span> station</div>
-                    <div class="realtime-countdown">Next train arriving in <span></span> seconds</div>
+                    <div class="realtime-countdown">
+                        <span>
+                        </span>
+                    </div>
+                    <div class="jquery-realtime-countdown"></div>
                     <div class="realtime-dept">
+                        <table class="table">
+                            <thead>
+                              <tr>
+                                <th>Arriving in (Minutes)</th>
+                                <th>Platform</th>
+                                <th>Delay</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
                     </div>
                 </section>
             </div>
             <div class="col-md-12 col-sm-12 col-lg-12 col-xs-12">
-                <section class="col-md-6 col-sm-6 col-lg-6 col-xs-12">
+                <section class="col-md-12 col-sm-12 col-lg-12 col-xs-12">
                     <div>Trains from <span id="src-span"></span> to <span id="dest-span"></span></div>
                     <div class="train-info">
+                        <table class="table">
+                            <thead>
+                              <tr>
+                                <th>Departure time at Source</th>
+                                <th>Source Station</th>
+                                <th>Arrival time at Destination</th>
+                                <th>Destination Station</th>
+                                <th>Fare</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
                     </div>
                 </section>
             </div>
@@ -83,7 +114,7 @@
         var destLat;
         var srcLong;
         var destLong;
-        var countdown;
+        var countdown = 0;
         var visits;
 
         if(localStorage.visits){
@@ -117,17 +148,18 @@
                     success: function(data){ 
                         tripData = JSON.parse(data)
                         countdown = tripData.etd[0].minutes * 60
+                        $('.jquery-realtime-countdown').countdown({until: "+"+countdown.toString()+"s"}); 
                         var newHTML = $.map(tripData.etd, function(value){
-                            return('<div class="realtime-box col-md-12 col-sm-12 col-xs-12 col-lg-12"><div col->Minutes - <span>'+value.minutes+'</span></div>'
-                                +'<div>Platform - <span>'+value.platform+'</span></div>'
-                                +'<div>Delay - <span>'+value.delay+'</span></div></div>')
+                            return('<tr><td><div class="col-md-4 col-sm-4 col-lg-4 col-xs-12"><span>'+value.minutes+'</span></div></td>'
+                                +'<td><div class="col-md-4 col-sm-4 col-lg-4 col-xs-12"><span>'+value.platform+'</span></div></td>'
+                                +'<td><div class="col-md-4 col-sm-4 col-lg-4 col-xs-12"><span>'+value.delay+'</span></div></td></tr>')
                         });
 
                         var newTrain = $.map(tripData.trip, function(value){
-                            return('<div class="realtime-box"><div><span>'+value['@origTimeMin']+' - '+value['@origTimeDate']+' from '+value['@origin']+'-> '+value['@destTimeMin']+' - '+value['@destTimeDate']+' to '+value['@destination']+'</span></div>'+'<div>Fare - <span>'+value['@fare']+'</span></div></div>')
+                            return('<tr><td>'+value['@origTimeMin']+' '+value['@origTimeDate']+'</td><td>'+value['@origin']+'</td> <td>'+value['@destTimeMin']+' '+value['@destTimeDate']+'</td><td>'+value['@destination']+'</td><td>'+value['@fare']+'</td></tr>')
                         })
-                        $(".realtime-dept").html(newHTML.join(""));
-                        $(".train-info").html(newTrain.join(""));
+                        $(".realtime-dept tbody").html(newHTML.join(""));
+                        $(".train-info tbody").html(newTrain.join(""));
                     }
                 });
         }
@@ -142,6 +174,8 @@
         }
 
         setInterval(myCountdown,1000)
+
+        
 
 
         $(function(){
