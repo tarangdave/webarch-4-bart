@@ -19,8 +19,8 @@
     <div class="container">
         <div class="col-md-6 col-sm-6 col-xs-12 col-lg-6">
             <div class="col-md-12 col-sm-12 col-lg-12 col-xs-12">
-                <div class="col-md-5 col-lg-5 col-sm-12 col-xs-12">Source Station</div>
-                <div class="col-md-5 col-lg-5 col-sm-12 col-xs-12">Destination Station</div>
+                <div class="col-md-5 col-lg-5 col-sm-12 col-xs-12 all-title">Source Station</div>
+                <div class="col-md-5 col-lg-5 col-sm-12 col-xs-12 all-title">Destination Station</div>
             </div>
             <div class="col-md-12 col-sm-12 col-lg-12 col-xs-12">
                 <section class="col-md-5 col-lg-5 col-sm-12 col-xs-12">
@@ -41,10 +41,10 @@
             </div>
             <div class="col-md-12 col-sm-12 col-lg-12 col-xs-12">
                 <section class="col-md-12 col-sm-12 col-lg-12 col-xs-12">
-                    <div class="realtime-title">Realtime Departure time at <span></span> station</div>
-                    <div class="realtime-countdown">
+                    <div class="realtime-title all-title">Realtime Departure time at <span></span> station</div><hr>
+                    <div class="realtime-countdown all-title">Train Leaving in 
                         <span>
-                        </span>
+                        </span> seconds
                     </div>
                     <div class="jquery-realtime-countdown"></div>
                     <div class="realtime-dept">
@@ -64,7 +64,7 @@
             </div>
             <div class="col-md-12 col-sm-12 col-lg-12 col-xs-12">
                 <section class="col-md-12 col-sm-12 col-lg-12 col-xs-12">
-                    <div>Trains from <span id="src-span"></span> to <span id="dest-span"></span></div>
+                    <div class="all-title">Trains from <span id="src-span"></span> to <span id="dest-span"></span></div>
                     <div class="train-info">
                         <table class="table">
                             <thead>
@@ -148,7 +148,7 @@
                     success: function(data){ 
                         tripData = JSON.parse(data)
                         countdown = tripData.etd[0].minutes * 60
-                        $('.jquery-realtime-countdown').countdown({until: "+"+countdown.toString()+"s"}); 
+                        // $('.jquery-realtime-countdown').countdown({until: "+"+countdown.toString()+"s"}); 
                         var newHTML = $.map(tripData.etd, function(value){
                             return('<tr><td><div class="col-md-4 col-sm-4 col-lg-4 col-xs-12"><span>'+value.minutes+'</span></div></td>'
                                 +'<td><div class="col-md-4 col-sm-4 col-lg-4 col-xs-12"><span>'+value.platform+'</span></div></td>'
